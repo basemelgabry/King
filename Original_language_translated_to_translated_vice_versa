@@ -1,0 +1,55 @@
+add_action('marketking_edit_product_after_tags', function($post) {
+    global $sitepress;
+
+    // Check if the product is not saved yet (does not have an ID)
+    if (empty($post->ID) || $post->ID == 0) {
+        echo '<div style="background:#ffeb3b;padding:10px;margin-bottom:10px;border:solid 1px #ff9800;color:#000;">';
+        echo '<strong>معلومات المنتج:</strong><br>';
+        echo 'يرجى حفظ المنتج أولاً لعرض معلومات الترجمة.';
+        echo '</div>';
+        return;
+    }
+
+    //Check if WPML is enabled
+    if (!function_exists('icl_object_id')) {
+        echo '<div style="background:#ffcccc;padding:10px;margin-bottom:10px;border:solid 1px #ff0000;color:#000;">';
+        echo '<strong>خطأ:</strong> WPML غير مُثبت أو غير مفعل. يرجى التأكد من تثبيت WPML.';
+        echo '</div>';
+        return;
+    }
+
+    //Get the translation ID (TRID) for the current product
+    $trid = apply_filters('wpml_element_trid', null, $post->ID, 'post_product');
+
+    if (empty($trid)) {
+        echo '<div style="background:#ffeb3b;padding:10px;margin-bottom:10px;border:solid 1px #ff9800;color:#000;">';
+        echo '<strong>معلومات المنتج:</strong><br>';
+        echo 'لم يتم تسجيل المنتج بالكامل في WPML بعد. يرجى حفظ المنتج وإعادة تحميل الصفحة.';
+        echo '</div>';
+        return;
+    }
+
+
+   // Get all translations for the product
+    $original_product_id = $sitepress->get_original_element_id_by_trid($trid);
+
+    if ($original_product_id == $post->ID) {
+
+     echo '<div class="alert alert-primary alert-icon original-product-message"><em class="icon ni ni-check-circle"></em> ';
+    echo '<strong>This is the original product that is made by entering basic data.</strong>.'; 
+
+        echo '</div>';
+    } else{
+        $original_title = get_the_title($original_product_id);
+        $original_url = get_edit_post_link($original_product_id);
+        
+		echo '<style>div#woocommerce-product-data, .marketking_card_gal_cat_tags, #marketking_edit_product_data_container {display: none;}</style>';
+		echo '<div class="alert alert-primary alert-icon"><em class="icon ni ni-check-circle"></em> ';
+        echo '<strong>This is the translated product | To add modifications, they must be done through the original product</strong>.<a class="MOSHKELA" href="' . esc_url($original_url) . '">';
+        echo '<button type="button" class="btn btn-sm btn-gray view_product_button"><em class="icon ni ni-eye-fill button-icon"></em>' . esc_html($original_title) . '</button></a>';
+        echo'<!-- Hide the translation button  --><style>.translation-gc {display: none;}</style>' ;
+        echo '</div>';
+		
+
+    }
+});
