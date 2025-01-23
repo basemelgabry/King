@@ -1,0 +1,83 @@
+// 1. Execute the code when saving the product (Add/Edit Product Page)
+
+
+add_action('woocommerce_process_product_meta', 'force_correct_product_language', 10, 2);
+function force_correct_product_language($post_id, $post) {
+    if ($post->post_type !== 'product' || wp_is_post_revision($post_id)) {
+        return;
+    }
+
+// Determine the correct language based on the current UI
+
+$current_lang = isset($_GET['lang']) ? sanitize_text_field($_GET['lang']) : apply_filters('wpml_current_language', NULL);
+    
+    if (!$current_lang) {
+        $current_lang = defined('ICL_LANGUAGE_CODE') ? ICL_LANGUAGE_CODE : 'en'; // فرض اللغة الافتراضية
+    }
+
+    error_log("Setting correct language to: " . $current_lang);
+
+
+    // Applying the correct language to the product
+    do_action('wpml_set_element_language_details', array(
+        'element_id'   => $post_id,
+        'element_type' => 'post_product',
+        'trid'         => apply_filters('wpml_element_trid', null, $post_id, 'post_product'),
+        'language_code'=> $current_lang
+    ));
+}
+
+
+
+
+
+
+////2. Execute the code when loading the add or edit product page
+
+
+add_action('admin_init', function() {
+    global $pagenow;
+
+    if ($pagenow == 'post.php' || $pagenow == 'post-new.php') {
+        if (get_post_type() === 'product') {
+            $current_lang = apply_filters('wpml_current_language', NULL);
+            error_log("DEBUG: Entered product page with language - " . $current_lang);
+        }
+    }
+});
+
+
+
+
+
+// 3. Execute the code when submitting the product via MarketKing form
+
+add_action('marketking_before_save_product', function($post_id) {
+    $current_lang = apply_filters('wpml_current_language', NULL);
+    error_log("MarketKing Product Save - Language Detected: " . $current_lang);
+
+    do_action('wpml_set_element_language_details', array(
+        'element_id'   => $post_id,
+        'element_type' => 'post_product',
+        'trid'         => apply_filters('wpml_element_trid', null, $post_id, 'post_product'),
+        'language_code'=> $current_lang
+    ));
+});
+
+ 
+ 
+// 4. Execute code when changing language from WPML
+
+add_action('wpml_switch_language', function($lang) {
+    error_log("User switched to language: " . $lang);
+});
+
+ 
+// // 5. Execute the code when entering the Vendor Dashboard
+
+add_action('template_redirect', function() {
+    if (is_page('vendor-dashboard')) {
+        $current_lang = apply_filters('wpml_current_language', NULL);
+        error_log("Vendor Dashboard - Language Detected: " . $current_lang);
+    }
+});
