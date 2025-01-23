@@ -1,0 +1,10 @@
+// The language switcher is assigned to the vendor dashboard menu.
+
+
+add_action('marketking_extend_menu', function($menu){
+?>
+<li class="nk-menu-item">
+<?php do_action('wpml_add_language_selector'); ?>
+</li><!-- .nk-menu-item -->
+<?php
+}, 10, 1);
