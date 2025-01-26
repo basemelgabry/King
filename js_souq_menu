@@ -1,0 +1,52 @@
+//  كود 1  اخفاء زر wishlist & compare 0 
+
+
+    // الحصول على جميع العناصر التي تحتوي على الفئة 'wd-tools-count'
+    var toolsCountElements = document.querySelectorAll('.wd-tools-count');
+
+    toolsCountElements.forEach(function(countElement) {
+        // التحقق من النص داخل العنصر
+        var textContent = countElement.textContent.trim();
+
+        // إذا كان النص داخل العنصر هو "0" فقط، إخفاءه
+        if (textContent === '0') {
+            countElement.style.display = 'none';
+        }
+    }); 
+// كود 2  اخفاء زر الكارد
+
+
+// دالة لإخفاء العناصر إذا كانت قيمتها "0"
+function hideZeroElements() {
+    var cartNumberElements = document.querySelectorAll('.wd-cart-number.wd-tools-count');
+
+    cartNumberElements.forEach(function(countElement) {
+        var textContent = countElement.textContent.trim();
+
+        // إذا كان النص يحتوي فقط على "0" أو يبدأ بـ "0 " مع نص إضافي
+        if (textContent === '0' || textContent.startsWith('0 ')) {
+            countElement.style.display = 'none';
+        } else {
+            countElement.style.display = 'inline-block'; // إظهار العنصر إذا لم يكن "0"
+        }
+    });
+}
+
+// تطبيق الوظيفة مباشرة عند تحميل الصفحة
+document.addEventListener("DOMContentLoaded", function () {
+    setTimeout(hideZeroElements, 500); // تأخير بسيط لضمان تحميل القيم
+
+    // مراقبة تغييرات العناصر التي تحتوي على الأرقام
+    var targetElement = document.querySelector('.wd-header-cart'); // استهداف عنصر محدد بدلاً من الجسم كله
+
+    if (targetElement) {
+        var observer = new MutationObserver(function () {
+            hideZeroElements();
+        });
+
+        observer.observe(targetElement, {
+            childList: true,  
+            subtree: true    
+        });
+    }
+});
